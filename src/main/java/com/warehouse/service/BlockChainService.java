@@ -10,16 +10,12 @@ import java.util.Set;
 
 public interface BlockChainService {
 
-    void save(ProductDto product);
+    void save(ProductDto product) throws Exception;
 
-    void saveAll(List<ProductDto> productDtos);
+    void saveAll(List<ProductDto> productDtos) throws Exception;
 
 
     List<ProductDto> getAll();
-
-//    ProductBlock getById(String id);
-//
-//    ProductBlock findLastRecord();
 
     List<ProductDto> findByProductProperty(String propertyName, String propertyValue) throws Exception;
 

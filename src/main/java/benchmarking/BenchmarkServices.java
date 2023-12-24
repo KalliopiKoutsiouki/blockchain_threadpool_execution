@@ -68,22 +68,21 @@ public class BenchmarkServices {
     return products;
     }
     @Benchmark
-    public void saveBlock() {
-
+    public void saveBlock() throws Exception {
         saveBlock(service, genesisProductData);
     }
 
     @Benchmark
-    public void saveAll() {
+    public void saveAll() throws Exception {
 
         saveAll(service, productDtos);
     }
 
-    private static void saveBlock(BlockChainService service, ProductDto productData) {
+    private static void saveBlock(BlockChainService service, ProductDto productData) throws Exception {
         service.save(productData);
     }
 
-    private static void saveAll(BlockChainService service, List<ProductDto> productDtoList) {
+    private static void saveAll(BlockChainService service, List<ProductDto> productDtoList) throws Exception {
         service.saveAll(productDtoList);
     }
 

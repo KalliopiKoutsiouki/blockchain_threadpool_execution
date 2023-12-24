@@ -18,4 +18,23 @@ public class BlockchainPrjApplication {
         SpringApplication.run(BlockchainPrjApplication.class, args);
     }
 
+    public static class SharedFlag {
+        private volatile boolean flag = false;
+        private static final SharedFlag instance = new SharedFlag();
+        private SharedFlag() {
+        }
+
+        public static SharedFlag getInstance() {
+            return instance;
+        }
+
+        public boolean isFlagSet() {
+            return flag;
+        }
+
+        public void setFlag(boolean value) {
+            flag = value;
+        }
+    }
+
 }

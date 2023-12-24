@@ -17,12 +17,12 @@ public class BlockChainController {
     BlockChainService blockChainService;
 
     @PostMapping("/save")
-    public void saveProduct(@RequestBody ProductDto product) {
+    public void saveProduct(@RequestBody ProductDto product) throws Exception {
         blockChainService.save(product);
     }
 
     @PostMapping("/saveAll")
-    public void saveProduct(@RequestBody List<ProductDto> products) {
+    public void saveProduct(@RequestBody List<ProductDto> products) throws Exception {
          blockChainService.saveAll(products);
     }
     @GetMapping("/getAll")
