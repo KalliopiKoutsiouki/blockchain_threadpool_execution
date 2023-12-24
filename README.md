@@ -23,3 +23,9 @@ Sequential implementation:
 
 Multiple threads implementation:
 ![v2_multithreading_benchmarking](https://github.com/KalliopiKoutsiouki/blockchain_threadpool_execution/assets/59616356/5d2b6eb6-fd66-46bb-8be1-9125551c5f2c)
+
+# Written with
+- Spring Boot 3 
+- H2 Database 
+- JMH 
+- OpenAPI 3
