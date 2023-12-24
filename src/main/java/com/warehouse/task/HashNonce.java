@@ -1,4 +1,4 @@
-package com.warehouse.tasks;
+package com.warehouse.task;
 
 public class HashNonce {
 

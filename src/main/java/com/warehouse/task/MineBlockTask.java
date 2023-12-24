@@ -1,4 +1,4 @@
-package com.warehouse.tasks;
+package com.warehouse.task;
 
 import com.warehouse.BlockchainPrjApplication;
 import com.warehouse.model.ProductDto;
