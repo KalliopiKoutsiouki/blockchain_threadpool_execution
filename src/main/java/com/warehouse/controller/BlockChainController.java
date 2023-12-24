@@ -39,14 +39,4 @@ public class BlockChainController {
     public Map<String, String> getPriceThroughTime(@PathVariable String productCode) throws Exception {
         return blockChainService.getPriceThroughTime(productCode);
     }
-
-//    @GetMapping("/getById/{id}")
-//    public ProductBlock getProductById(@PathVariable String id) {
-//        return blockChainService.getById(id);
-//    }
-//
-//    @GetMapping("/findLastRecord")
-//    public ProductBlock findLastRecord() {
-//        return blockChainService.findLastRecord();
-//    }
 }
