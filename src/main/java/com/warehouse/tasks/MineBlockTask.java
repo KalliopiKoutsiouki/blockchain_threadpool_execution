@@ -1,25 +1,19 @@
 package com.warehouse.tasks;
 
 import com.warehouse.BlockchainPrjApplication;
-import com.warehouse.model.BlockDto;
 import com.warehouse.model.ProductDto;
+import com.warehouse.utils.AppConstants;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.Callable;
 
-
-
 public class MineBlockTask implements Callable {
-
-    private static final int PREFIX = 5;
 
     private int startNonce;
     private int end;
-
     BlockchainPrjApplication.SharedFlag stopFlag = BlockchainPrjApplication.SharedFlag.getInstance();
-
     private String hash;
     private String previousHash;
     private ProductDto productData;
@@ -35,15 +29,14 @@ public class MineBlockTask implements Callable {
 
     @Override
     public HashNonce call() throws Exception {
-        String prefixString = new String(new char[PREFIX]).replace('\0', '0');
+        String prefixString = new String(new char[AppConstants.PREFIX]).replace('\0', '0');
         while (!stopFlag.isFlagSet()) {
             if (startNonce > end) {
                 return null;
             }
             String hash = calculateBlockHash(startNonce);
             startNonce++;
-//            System.out.println(Thread.currentThread().getId());
-            if (hash.substring(0, PREFIX).equals(prefixString)) {
+            if (hash.substring(0, AppConstants.PREFIX).equals(prefixString)) {
                 System.out.println("Condition met by thread: " + Thread.currentThread().getId());
                 System.out.println("Nonce value: " + startNonce);
                 System.out.println("Hash: " + hash);

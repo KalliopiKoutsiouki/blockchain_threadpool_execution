@@ -8,6 +8,7 @@ import com.warehouse.model.ProductDto;
 import com.warehouse.repository.BlockRepository;
 import com.warehouse.tasks.HashNonce;
 import com.warehouse.tasks.MineBlockTask;
+import com.warehouse.utils.AppConstants;
 import com.warehouse.utils.DateFormatter;
 import com.warehouse.utils.InputValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,6 @@ import java.util.concurrent.Future;
  */
 @Service
 public class BlockChainServiceImpl implements BlockChainService{
-
-    private static final int TARGET_VALUE =2500000;
-    private static final int INCREMENT_PER_THREAD = 10000;
-    private static final int NUM_THREADS = 3;
 
     @Autowired
     BlockRepository blockRepository;
@@ -147,9 +144,9 @@ public class BlockChainServiceImpl implements BlockChainService{
     private HashNonce startParallelismToMineHash(ProductDto product, String previousHash, HashNonce hashNonce) throws ExecutionException, InterruptedException {
         ExecutorService executorService = resetFlagAndStartExecutorService();
         List<Future<HashNonce>> futures = new ArrayList<>();
-        for (int i = 0; i <= TARGET_VALUE; i += INCREMENT_PER_THREAD) {
+        for (int i = 0; i <= AppConstants.TARGET_VALUE; i += AppConstants.INCREMENT_PER_THREAD) {
             int startNonce = i;
-            int end = i + INCREMENT_PER_THREAD - 1;
+            int end = i + AppConstants.INCREMENT_PER_THREAD - 1;
             futures.add(executorService.submit(new MineBlockTask(startNonce, end, previousHash, product)));
         }
         executorService.shutdown();
@@ -172,7 +169,7 @@ public class BlockChainServiceImpl implements BlockChainService{
 
     private static ExecutorService resetFlagAndStartExecutorService() {
         BlockchainPrjApplication.SharedFlag.getInstance().setFlag(false);
-        ExecutorService executorService = Executors.newFixedThreadPool(NUM_THREADS);
+        ExecutorService executorService = Executors.newFixedThreadPool(AppConstants.NUM_THREADS);
         return executorService;
     }
 
