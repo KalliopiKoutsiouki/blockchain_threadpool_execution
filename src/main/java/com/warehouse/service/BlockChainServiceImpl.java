@@ -33,7 +33,6 @@ public class BlockChainServiceImpl implements BlockChainService{
     @Autowired
     BlockRepository blockRepository;
 
-
    // overloaded for running benchmarking
     public BlockChainServiceImpl(BlockRepository blockRepository) {
         this.blockRepository = blockRepository;
@@ -71,8 +70,6 @@ public class BlockChainServiceImpl implements BlockChainService{
                 throw new Exception(e);
             }
         }
-
-
     }
 
     @Override
@@ -157,10 +154,8 @@ public class BlockChainServiceImpl implements BlockChainService{
         }
         executorService.shutdown();
         for (Future<HashNonce> future : futures) {
-            System.out.println(future.get());
             try {
                 if (future.get() != null) {
-
                     hashNonce = future.get();
                 }
             } catch (InterruptedException e) {
