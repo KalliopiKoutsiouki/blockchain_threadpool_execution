@@ -8,6 +8,7 @@ import com.warehouse.model.ProductDto;
 import com.warehouse.repository.BlockRepository;
 import com.warehouse.task.HashNonce;
 import com.warehouse.task.MineBlockTask;
+import com.warehouse.task.MineBlockTaskV3;
 import com.warehouse.utils.AppConstants;
 import com.warehouse.utils.DateFormatter;
 import com.warehouse.utils.InputValidator;
@@ -20,6 +21,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * BlockChain service layer
@@ -30,6 +33,7 @@ public class BlockChainServiceImpl implements BlockChainService{
     @Autowired
     BlockRepository blockRepository;
 
+    private final Lock lock = new ReentrantLock();
    // overloaded for running benchmarking
     public BlockChainServiceImpl(BlockRepository blockRepository) {
         this.blockRepository = blockRepository;
@@ -45,23 +49,25 @@ public class BlockChainServiceImpl implements BlockChainService{
     @Override
     public void save(ProductDto product) throws Exception {
         product.validateProductDtoInput();
+
         try {
             ProductBlock productBlock = createProductBlock(product);
-            if (productBlock!=null) {
+            if (productBlock!=null && productBlock.extractBlockDto().getHash() != null) {
                 blockRepository.save(productBlock);
             } else {
-                throw new Exception("Error in mining block");
-            }
+                    AppConstants.TARGET_VALUE += AppConstants.TARGET_VALUE;
+                    save(product);
+                }
         } catch (RuntimeException re) {
             throw new Exception(re.getMessage());
         }
+
     }
 
     @Override
     public void saveAll(List<ProductDto> productDtos) throws Exception {
         for (ProductDto product : productDtos) {
             try {
-                System.out.println(product.toString());
                 save(product);
             } catch (Exception e) {
                 throw new Exception(e);
@@ -120,7 +126,7 @@ public class BlockChainServiceImpl implements BlockChainService{
         addPreviousIdIfExists(product);
         String previousHash = getPreviousHash();
         HashNonce hashNonce = new HashNonce();
-        hashNonce = startParallelismToMineHash(product, previousHash, hashNonce);
+        hashNonce = startParallelismToMineHash2(product, previousHash, hashNonce);
         if (hashNonce!=null) {
             BlockDto block = new BlockDto(previousHash, product, hashNonce.getHash(), hashNonce.getNonce());
             String blockJson = new Gson().toJson(block);
@@ -163,8 +169,50 @@ public class BlockChainServiceImpl implements BlockChainService{
                 throw new RuntimeException(e);
             }
         }
-
             return hashNonce;
+    }
+
+    private HashNonce startParallelismToMineHash2(ProductDto product, String previousHash, HashNonce hashNonce) throws ExecutionException, InterruptedException {
+        BlockchainPrjApplication.SharedFlag.getInstance().setFlag(false);
+        List<HashNonce> results = new ArrayList<>();
+        List<Thread> threads = new ArrayList<>();
+        for (int i = 0; i <= AppConstants.TARGET_VALUE; i += AppConstants.INCREMENT_PER_THREAD) {
+            int startNonce = i;
+            int end = i + AppConstants.INCREMENT_PER_THREAD - 1;
+            MineBlockTaskV3 task = new MineBlockTaskV3(startNonce, end, previousHash, product);
+            Thread thread = new Thread(() -> {
+                try {
+                    HashNonce result = task.mineBlock();
+                    lock.lock();
+                    try {
+                        results.add(result);
+                    } finally {
+                        lock.unlock();
+                    }
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                    throw new RuntimeException(e);
+                }
+            });
+            threads.add(thread);
+            thread.start();;
+        }
+
+        for (Thread thread:threads) {
+            thread.join();
+        }
+        lock.lock();
+        try {
+            for (HashNonce result : results) {
+                if (result != null) {
+                    hashNonce = result;
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+
+        return hashNonce;
     }
 
     private static ExecutorService resetFlagAndStartExecutorService() {

@@ -1,6 +1,5 @@
 package com.warehouse.controller;
 
-import com.warehouse.model.ProductBlock;
 import com.warehouse.model.ProductDto;
 import com.warehouse.service.BlockChainService;
 import org.springframework.beans.factory.annotation.Autowired;
