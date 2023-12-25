@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -49,7 +50,6 @@ public class BlockChainServiceImpl implements BlockChainService{
     @Override
     public void save(ProductDto product) throws Exception {
         product.validateProductDtoInput();
-
         try {
             ProductBlock productBlock = createProductBlock(product);
             if (productBlock!=null && productBlock.extractBlockDto().getHash() != null) {
@@ -61,7 +61,6 @@ public class BlockChainServiceImpl implements BlockChainService{
         } catch (RuntimeException re) {
             throw new Exception(re.getMessage());
         }
-
     }
 
     @Override
@@ -174,33 +173,36 @@ public class BlockChainServiceImpl implements BlockChainService{
 
     private HashNonce startParallelismToMineHash2(ProductDto product, String previousHash, HashNonce hashNonce) throws ExecutionException, InterruptedException {
         BlockchainPrjApplication.SharedFlag.getInstance().setFlag(false);
-        List<HashNonce> results = new ArrayList<>();
         List<Thread> threads = new ArrayList<>();
-        for (int i = 0; i <= AppConstants.TARGET_VALUE; i += AppConstants.INCREMENT_PER_THREAD) {
+        List<HashNonce> results = new ArrayList<>();
+        AtomicBoolean resultFound = new AtomicBoolean(false);
+        for (int i = 0; i <= AppConstants.TARGET_VALUE && !BlockchainPrjApplication.SharedFlag.getInstance().isFlagSet(); i += AppConstants.INCREMENT_PER_THREAD) {
             int startNonce = i;
             int end = i + AppConstants.INCREMENT_PER_THREAD - 1;
             MineBlockTaskV3 task = new MineBlockTaskV3(startNonce, end, previousHash, product);
             Thread thread = new Thread(() -> {
                 try {
-                    HashNonce result = task.mineBlock();
-                    lock.lock();
-                    try {
-                        results.add(result);
-                    } finally {
-                        lock.unlock();
+                        HashNonce result = task.mineBlock();
+                        if (result != null) {
+                            resultFound.set(true);
+                        }
+                        lock.lock();
+                        try {
+                            results.add(result);
+                        } finally {
+                            lock.unlock();
                     }
-                } catch (Exception e) {
-                    System.out.println(e.getMessage());
-                    throw new RuntimeException(e);
-                }
+                    } catch(Exception e){
+                        System.out.println(e.getMessage());
+                        throw new RuntimeException(e);
+                    }
             });
             threads.add(thread);
             thread.start();;
         }
-
-        for (Thread thread:threads) {
-            thread.join();
-        }
+//        for (Thread thread:threads) {
+//            thread.join();
+//        }
         lock.lock();
         try {
             for (HashNonce result : results) {
@@ -211,7 +213,6 @@ public class BlockChainServiceImpl implements BlockChainService{
         } finally {
             lock.unlock();
         }
-
         return hashNonce;
     }
 

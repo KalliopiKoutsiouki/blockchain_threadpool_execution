@@ -1,14 +1,9 @@
 package com.warehouse;
 
-import com.google.gson.Gson;
-import com.warehouse.model.BlockDto;
-import com.warehouse.model.ProductDto;
-import com.warehouse.model.ProductBlock;
-import com.warehouse.repository.BlockRepository;
-import com.warehouse.service.BlockChainService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @SpringBootApplication
 public class BlockchainPrjApplication {
@@ -18,7 +13,7 @@ public class BlockchainPrjApplication {
     }
 
     public static class SharedFlag {
-        private volatile boolean flag = false;
+        private AtomicBoolean flag = new AtomicBoolean(false);
         private static final SharedFlag instance = new SharedFlag();
         private SharedFlag() {
         }
@@ -28,11 +23,11 @@ public class BlockchainPrjApplication {
         }
 
         public boolean isFlagSet() {
-            return flag;
+            return flag.get();
         }
 
         public void setFlag(boolean value) {
-            flag = value;
+            flag.set(value);
         }
     }
 
