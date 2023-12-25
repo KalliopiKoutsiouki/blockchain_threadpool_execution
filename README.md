@@ -21,7 +21,7 @@ For measuring the results of parallelism, jmh has been integrated to the applica
 Sequential implementation: 
 ![sequencial_benchmarking](https://github.com/KalliopiKoutsiouki/blockchain_threadpool_execution/assets/59616356/b9b8de87-90db-49d1-8010-d1f72bb91cc0)
 
-Multiple threads implementation:
+3 threads with a nonce step of 10.000 implementation:
 ![v2_multithreading_benchmarking](https://github.com/KalliopiKoutsiouki/blockchain_threadpool_execution/assets/59616356/5d2b6eb6-fd66-46bb-8be1-9125551c5f2c)
 
 # Written with
