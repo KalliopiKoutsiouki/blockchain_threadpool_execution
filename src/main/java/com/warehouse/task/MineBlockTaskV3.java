@@ -29,7 +29,6 @@ public class MineBlockTaskV3 {
 
     }
 
-
     public HashNonce mineBlock() throws Exception {
         String prefixString = new String(new char[AppConstants.PREFIX]).replace('\0', '0');
         while (!stopFlag.isFlagSet()) {

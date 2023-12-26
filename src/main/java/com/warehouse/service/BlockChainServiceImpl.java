@@ -7,7 +7,6 @@ import com.warehouse.model.ProductBlock;
 import com.warehouse.model.ProductDto;
 import com.warehouse.repository.BlockRepository;
 import com.warehouse.task.HashNonce;
-import com.warehouse.task.MineBlockTask;
 import com.warehouse.task.MineBlockTaskV3;
 import com.warehouse.utils.AppConstants;
 import com.warehouse.utils.DateFormatter;
@@ -20,7 +19,6 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -125,7 +123,7 @@ public class BlockChainServiceImpl implements BlockChainService{
         addPreviousIdIfExists(product);
         String previousHash = getPreviousHash();
         HashNonce hashNonce = new HashNonce();
-        hashNonce = startParallelismToMineHash2(product, previousHash, hashNonce);
+        hashNonce = startCustomParallelismToMineHash(product, previousHash, hashNonce);
         if (hashNonce!=null) {
             BlockDto block = new BlockDto(previousHash, product, hashNonce.getHash(), hashNonce.getNonce());
             String blockJson = new Gson().toJson(block);
@@ -138,7 +136,7 @@ public class BlockChainServiceImpl implements BlockChainService{
     /**
      * A method that uses parallelism to break down the mining process to a certain number of threads.
      * Each thread is searching for the nonce in a certain range of integers with a step of 10000.
-     * When the right nonce is found, the thread sets a volatile flag variable to inform the other threads to stop their running process.
+     * When the right nonce is found, the thread sets an atomicBoolean flag variable to inform the other threads to stop their running process.
      * @param product
      * @param previousHash
      * @param hashNonce
@@ -146,37 +144,12 @@ public class BlockChainServiceImpl implements BlockChainService{
      * @throws ExecutionException
      * @throws InterruptedException
      */
-    private HashNonce startParallelismToMineHash(ProductDto product, String previousHash, HashNonce hashNonce) throws ExecutionException, InterruptedException {
-        ExecutorService executorService = resetFlagAndStartExecutorService();
-        List<Future<HashNonce>> futures = new ArrayList<>();
-        for (int i = 0; i <= AppConstants.TARGET_VALUE; i += AppConstants.INCREMENT_PER_THREAD) {
-            int startNonce = i;
-            int end = i + AppConstants.INCREMENT_PER_THREAD - 1;
-            futures.add(executorService.submit(new MineBlockTask(startNonce, end, previousHash, product)));
-        }
-        executorService.shutdown();
-        for (Future<HashNonce> future : futures) {
-            try {
-                if (future.get() != null) {
-                    hashNonce = future.get();
-                }
-            } catch (InterruptedException e) {
-                System.out.println(e.getMessage());
-                throw new RuntimeException(e);
-            } catch (ExecutionException e) {
-                System.out.println(e.getMessage());
-                throw new RuntimeException(e);
-            }
-        }
-            return hashNonce;
-    }
-
-    private HashNonce startParallelismToMineHash2(ProductDto product, String previousHash, HashNonce hashNonce) throws ExecutionException, InterruptedException {
+    private HashNonce startCustomParallelismToMineHash(ProductDto product, String previousHash, HashNonce hashNonce) throws ExecutionException, InterruptedException {
         BlockchainPrjApplication.SharedFlag.getInstance().setFlag(false);
         List<Thread> threads = new ArrayList<>();
         List<HashNonce> results = new ArrayList<>();
         AtomicBoolean resultFound = new AtomicBoolean(false);
-        for (int i = 0; i <= AppConstants.TARGET_VALUE && !BlockchainPrjApplication.SharedFlag.getInstance().isFlagSet(); i += AppConstants.INCREMENT_PER_THREAD) {
+        for (int i = 0; i <= AppConstants.TARGET_VALUE && !resultFound.get(); i += AppConstants.INCREMENT_PER_THREAD) {
             int startNonce = i;
             int end = i + AppConstants.INCREMENT_PER_THREAD - 1;
             MineBlockTaskV3 task = new MineBlockTaskV3(startNonce, end, previousHash, product);
@@ -200,14 +173,12 @@ public class BlockChainServiceImpl implements BlockChainService{
             threads.add(thread);
             thread.start();;
         }
-//        for (Thread thread:threads) {
-//            thread.join();
-//        }
         lock.lock();
         try {
             for (HashNonce result : results) {
                 if (result != null) {
                     hashNonce = result;
+                    break;
                 }
             }
         } finally {
