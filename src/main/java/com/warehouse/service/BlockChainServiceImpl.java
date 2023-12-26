@@ -163,7 +163,6 @@ public class BlockChainServiceImpl implements BlockChainService{
                 throw new RuntimeException(e);
             }
         }
-
             return hashNonce;
     }
 

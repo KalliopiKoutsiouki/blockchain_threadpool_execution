@@ -1,10 +1,4 @@
 package com.warehouse.model;
-
-import com.google.gson.Gson;
-
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 public final class BlockDto {
