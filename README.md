@@ -8,7 +8,7 @@ The web api is exposing the following services:
 - Monitor the shifting of a products price through time. /api/blockchain/seePriceShifting/{productCode}
 
 
-# Multithreading Optimization of Mining process
+# Optimization of Mining process
 
 Mining for the next block is a time consuming operation, hence the goal of this logic is to mine the nonce for a given product in a parallelized manner. 
 The mining process is divided into multiple tasks, each one responsible for a subrange of nonce values. 
