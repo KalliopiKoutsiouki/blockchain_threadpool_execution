@@ -21,8 +21,13 @@ For measuring the results of parallelism, jmh has been integrated to the applica
 Sequential implementation: 
 ![sequencial_benchmarking](https://github.com/KalliopiKoutsiouki/blockchain_threadpool_execution/assets/59616356/b9b8de87-90db-49d1-8010-d1f72bb91cc0)
 
-3 threads with a nonce step of 10.000 searches per task:
-![v2_multithreading_benchmarking](https://github.com/KalliopiKoutsiouki/blockchain_threadpool_execution/assets/59616356/5d2b6eb6-fd66-46bb-8be1-9125551c5f2c)
+3 threads:
+![image](https://github.com/KalliopiKoutsiouki/blockchain_threadpool_execution/assets/59616356/c3847acc-be07-4ce9-964b-b49eb445fa66)
+
+10 threads:
+![image](https://github.com/KalliopiKoutsiouki/blockchain_threadpool_execution/assets/59616356/27f1bcbd-52f8-41bf-b6e6-eb72ec7be420)
+
+
 
 # Written with
 - Spring Boot 3 
