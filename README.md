@@ -19,12 +19,15 @@ This version of the application implements the ExecutorService to manage and exe
 For measuring the results of parallelism, jmh has been integrated to the application.
 
 Sequential implementation: 
+
 ![sequencial_benchmarking](https://github.com/KalliopiKoutsiouki/blockchain_threadpool_execution/assets/59616356/b9b8de87-90db-49d1-8010-d1f72bb91cc0)
 
 3 threads:
+
 ![image](https://github.com/KalliopiKoutsiouki/blockchain_threadpool_execution/assets/59616356/c3847acc-be07-4ce9-964b-b49eb445fa66)
 
 10 threads:
+
 ![image](https://github.com/KalliopiKoutsiouki/blockchain_threadpool_execution/assets/59616356/27f1bcbd-52f8-41bf-b6e6-eb72ec7be420)
 
 
