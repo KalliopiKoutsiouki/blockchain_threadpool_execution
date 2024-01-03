@@ -44,13 +44,16 @@ public class BlockChainServiceImpl implements BlockChainService{
      */
     @Override
     public void save(ProductDto product) throws Exception {
+        AppConstants.STARTING_COUNT = 0;
         product.validateProductDtoInput();
         try {
             ProductBlock productBlock = createProductBlock(product);
-            if (productBlock!=null) {
+            if (productBlock!=null && productBlock.extractBlockDto().getHash() != null) {
                 blockRepository.save(productBlock);
             } else {
-                throw new Exception("Error in mining block");
+                AppConstants.STARTING_COUNT = AppConstants.TARGET_VALUE;
+                AppConstants.TARGET_VALUE += AppConstants.TARGET_VALUE;
+                save(product);
             }
         } catch (RuntimeException re) {
             throw new Exception(re.getMessage());
@@ -144,7 +147,7 @@ public class BlockChainServiceImpl implements BlockChainService{
     private HashNonce startParallelismToMineHash(ProductDto product, String previousHash, HashNonce hashNonce) throws ExecutionException, InterruptedException {
         ExecutorService executorService = resetFlagAndStartExecutorService();
         List<Future<HashNonce>> futures = new ArrayList<>();
-        for (int i = 0; i <= AppConstants.TARGET_VALUE; i += AppConstants.INCREMENT_PER_THREAD) {
+        for (int i = AppConstants.STARTING_COUNT; i <= AppConstants.TARGET_VALUE; i += AppConstants.INCREMENT_PER_THREAD) {
             int startNonce = i;
             int end = i + AppConstants.INCREMENT_PER_THREAD - 1;
             futures.add(executorService.submit(new MineBlockTask(startNonce, end, previousHash, product)));
