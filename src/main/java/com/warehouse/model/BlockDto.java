@@ -6,7 +6,6 @@ public final class BlockDto {
     private final String previousHash;
     private ProductDto productData;
     private final long timeStamp;
-    private String test;
     private int nonce;
 
     public BlockDto(String previousHash, ProductDto productData, String hash, int nonce) {
